@@ -1,0 +1,67 @@
+#Setup instruction
+#1.Install python 3.23 or above in C:\Program FIles\Pyth...
+#2.Force modules to install in python path above by running below command, modify path as needed [eg ..\Python313\.. may differ in your case]
+"C:\Program Files\Python313\python.exe" -m pip install requests schedule load_dotenv --target="C:\Program Files\Python313\Lib\site-packages"
+
+#3.edit .env File Variables
+DUCKDNS_DOMAIN=yourDuckDNSDomainName  #example 'smith.duckdns.org' will be smith --everything after . should be excluded
+DUCKDNS_TOKEN=yourDuckDNSToken #example abcs5fe3-sf4g4h56-rtry66-t543
+SERVER_URL=https://stillkonfuzed.com/DDNS/index.php # If you have a custom server then replace it. else leave it
+SECRET_KEY=YourSecret1234Changed #example AppleNoHashOrStupiSymbols ->
+    this will generate YourSecret1234.json when you visit https://stillkonfuzed.com/DDNS/index.php?download=Your_secret1234
+    It will have your ip address just in case duckdns fails. (serves as backup for worst case scenario)
+
+#4.Run CMD (Open Command Prompt as Administrator)
+# cd C:\Development\DuckDNSUpdaterPy or C:\DuckDNSUpdaterPy 
+
+#5.Install Service
+# duckdns-service-WinSW-x64.exe install duckdns-service.xml
+# duckdns-service-WinSW-x64.exe start duckdns-service.xml
+
+#6.WHEN STOP/Restart/Uninstall IS REQUIRED
+# duckdns-service-WinSW-x64.exe stop duckdns-service.xml
+# duckdns-service-WinSW-x64.exe restart duckdns-service.xml
+# duckdns-service-WinSW-x64.exe uninstall duckdns-service.xml
+
+
+#End - if errors -> see logs folder in the same folder you have the cron.py
+
+
+
+
+#if you have a custom server like stillkonfuzed.com then convert this php code to anything like C# or Java , and you will recieve the IP in ip.json file created automatically on your server : 
+<?php
+// Check if the request method is POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get the IP address from the POST data
+    if (isset($_POST['ip'])) {
+        $ip = $_POST['ip'];
+        $timestamp = $_POST['timestamp'];
+        $secret = $_POST['xString'];
+        $secret = base64_decode($secret);
+        // Optionally, validate and sanitize the IP address
+        if (filter_var($ip, FILTER_VALIDATE_IP) && $secret === "YourSecret1234Changed") {
+            date_default_timezone_set('Asia/Kolkata');
+            $data = [
+                'ip' => $ip,
+                'last_request' => $timestamp,
+                'last_updated'=> date('D d M Y g:i:s a')
+            ];
+    
+            // Write the updated data back to the JSON file
+            file_put_contents("ip.json", json_encode($data, JSON_PRETTY_PRINT));
+
+            echo json_encode(['status' => 'success', 'message' => "IP address received", 'ipdata'=>json_encode($data)]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Invalid IP address','ip'=>$ip]);
+        }
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'No IP address provided']);
+    }
+} 
+if($_SERVER['REQUEST_METHOD'] === 'GET'){
+    $jsonData = file_get_contents('ip.json');
+    $ipdata = json_decode($jsonData, true);
+?>
+
+

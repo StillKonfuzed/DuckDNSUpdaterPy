@@ -1,0 +1,11 @@
+<service>
+  <id>DuckDNSUpdater</id>
+  <name>DuckDNS Updater</name>
+  <description>Updates DuckDNS IP every 5 minutes</description>
+  <executable>C:\Program Files\Python313\python.exe</executable>
+  <arguments>cron.py</arguments>
+  <logpath>logs</logpath>
+  <log mode="roll"></log>
+  <stoptimeout>15sec</stoptimeout>
+</service>
+
